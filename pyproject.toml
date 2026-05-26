@@ -1,0 +1,20 @@
+[project]
+name = "terminalart"
+version = "0.1.0"
+description = "终端字符画播放器 - 将视频/图片转换为字符画在终端实时播放"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "colorama>=0.4.6",
+    "numpy>=2.4.6",
+    "opencv-python>=4.13.0.92",
+    "pillow>=12.2.0",
+    "pygame>=2.6.1",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
