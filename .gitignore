@@ -9,6 +9,11 @@ wheels/
 # Virtual environments
 .venv
 
+# Build artifacts
+dist/
+build/
+*.spec
+
 # Agent
 .agents/
 .claude/

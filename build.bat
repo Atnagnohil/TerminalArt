@@ -3,7 +3,7 @@ echo ========================================
 echo   TerminalArt - PyInstaller
 echo ========================================
 
-pyinstaller ^
+uv run pyinstaller ^
   --onefile ^
   --console ^
   --name=TerminalArt ^
