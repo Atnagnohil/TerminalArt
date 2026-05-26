@@ -23,7 +23,13 @@
 <br>
 
 <p align="center">
-  <img src="demo_C.gif" width="720" alt="TerminalArt demo - Mode C half-block">
+  <img src="demo_C.gif" width="720" alt="Mode C half-block">
+  <br><sub>Mode C — half-block HD</sub>
+</p>
+
+<p align="center">
+  <img src="demo_A.gif" width="720" alt="Mode A ASCII">
+  <br><sub>Mode A — classic gradient style</sub>
 </p>
 
 <br>
@@ -109,6 +115,14 @@ mode A & B. adjustable brightness cutoff — above → `*`, below → blank. low
 play once in the GUI (frames cache in background) → hit **Save**. multi-threaded render, auto audio mux if ffmpeg is on PATH.
 
 <br>
+
+### a note on quality
+
+Terminal playback is limited by the cmd window size — you can't fit thousands of characters on screen. This hits **mode A** the hardest: at ~100×30 characters, the grayscale gradient can feel blocky compared to what you'd expect.
+
+If you want the real deal, **save it as a video and watch that instead**. The exported MP4 isn't constrained by your terminal — it encodes every character pixel at full resolution. Character height defaults to 200, and the result is significantly sharper than what you'd see in the terminal.
+
+On render speed: **mode A is fast** (NumPy vectorized, frame-by-frame is near-instant). **Modes B and C are slower** — they parse ANSI per-pixel and render colored glyphs. This is normal. Plan accordingly for longer videos.
 
 ### trouble?
 

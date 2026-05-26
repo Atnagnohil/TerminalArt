@@ -158,3 +158,17 @@ class ModeC_HalfBlock(CharMapper):
             parts.append("\033[0m")
             lines.append("".join(parts))
         return "\n".join(lines)
+
+
+def create_mapper(mode: str, width: int, max_lines: int = 0,
+                  style: str = "classic", dot_mode: bool = False,
+                  threshold: int = 128) -> CharMapper:
+    if mode == "A":
+        return ModeA_ASCII(width=width, max_lines=max_lines, style=style,
+                           threshold=threshold)
+    elif mode == "B":
+        return ModeB_Color(width=width, max_lines=max_lines,
+                           dot_mode=dot_mode, threshold=threshold)
+    elif mode == "C":
+        return ModeC_HalfBlock(width=width, max_lines=max_lines)
+    raise ValueError(f"未知模式: {mode}")

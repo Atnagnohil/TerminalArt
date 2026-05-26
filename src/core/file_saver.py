@@ -141,14 +141,10 @@ class FileSaver:
         img_w = max(len(line) for line in lines) * char_w + 4
         img_h = len(lines) * line_h + 4
 
-        # 写入临时文件，后续合并音频
-        tmp_audio_out_path = None
-        if source_audio:
-            tmp_fd, tmp_audio_out_path = tempfile.mkstemp(suffix=".mp4")
-            os.close(tmp_fd)
-            write_path = tmp_audio_out_path
-        else:
-            write_path = path
+        # 始终先写临时文件，最后用 ffmpeg 转 H.264
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".mp4")
+        os.close(tmp_fd)
+        write_path = tmp_path
 
         total = len(frames)
         num_threads = min(4, os.cpu_count() or 1)
@@ -231,12 +227,11 @@ class FileSaver:
         else:
             _save_video_single(frames, write_path, fps, img_w, img_h, char_w, line_h, mask_cache, progress_cb)
 
-        if source_audio and tmp_audio_out_path:
-            _merge_audio(tmp_audio_out_path, source_audio, path)
-            try:
-                os.unlink(tmp_audio_out_path)
-            except Exception:
-                pass
+        _finalize_video(write_path, source_audio, path)
+        try:
+            os.unlink(write_path)
+        except Exception:
+            pass
 
         return path
 
@@ -302,22 +297,30 @@ def _concat_videos_opencv(temp_files: list[str], output_path: str, fps: float, i
         writer.release()
 
 
-def _merge_audio(video_path: str, audio_path: str, output_path: str):
-    """用 ffmpeg 将音频合并到视频"""
+def _finalize_video(temp_video: str, audio_path: str | None,
+                    output_path: str):
+    """用 ffmpeg 将视频重编码为 H.264，可选合并音频"""
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", temp_video,
+    ]
+    if audio_path:
+        cmd += ["-i", audio_path]
+    cmd += [
+        "-c:v", "libx264",
+        "-pix_fmt", "yuv420p",
+        "-preset", "medium",
+        "-crf", "23",
+    ]
+    if audio_path:
+        cmd += ["-c:a", "aac", "-shortest"]
+    cmd += [output_path]
+
     try:
-        subprocess.run(
-            ["ffmpeg", "-y",
-             "-i", video_path,
-             "-i", audio_path,
-             "-c:v", "copy",
-             "-c:a", "aac",
-             "-shortest",
-             output_path],
-            capture_output=True, timeout=60)
+        subprocess.run(cmd, capture_output=True, timeout=120)
     except Exception:
-        # 失败则用无声音版本
         import shutil
-        shutil.copy(video_path, output_path)
+        shutil.copy(temp_video, output_path)
 
 
 def _render_frame_image(frame_str: str, w: int, h: int,

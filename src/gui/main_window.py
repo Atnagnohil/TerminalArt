@@ -10,7 +10,7 @@ from core.char_mapper import (
     CHAR_SETS, CharMapper,
 )
 from core.file_saver import FileSaver
-from main import create_mapper
+from core.char_mapper import create_mapper
 from utils.terminal_utils import get_terminal_size
 
 
@@ -251,6 +251,7 @@ class TerminalArtGUI:
         else:
             cmd = [sys.executable, "-m", "main", "--console-play",
                    self.file_path.get()]
+        cmd += [
             "--mode", mode,
             "--fps", str(int(self.fps_limit.get())),
             "--loop", "1" if self.loop_play.get() else "0",

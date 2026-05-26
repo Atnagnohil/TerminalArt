@@ -9,28 +9,13 @@ import sys
 import os
 import subprocess
 from core.media_decoder import MediaDecoder
-from core.char_mapper import ModeA_ASCII, ModeB_Color, ModeC_HalfBlock
+from core.char_mapper import create_mapper
 from core.terminal_renderer import TerminalRenderer
-
-
-def create_mapper(mode: str, width: int, max_lines: int = 0,
-                  style: str = "classic", dot_mode: bool = False,
-                  threshold: int = 128):
-    if mode == "A":
-        return ModeA_ASCII(width=width, max_lines=max_lines, style=style,
-                           threshold=threshold)
-    elif mode == "B":
-        return ModeB_Color(width=width, max_lines=max_lines,
-                           dot_mode=dot_mode, threshold=threshold)
-    elif mode == "C":
-        return ModeC_HalfBlock(width=width, max_lines=max_lines)
-    raise ValueError(f"未知模式: {mode}")
+from utils.terminal_utils import get_terminal_size, clear_screen
 
 
 def quick_play(file_path: str, mode: str = "A", width: int = 120):
     """CLI 快速播放"""
-    from utils.terminal_utils import get_terminal_size
-
     decoder = MediaDecoder(file_path)
     fps = decoder.get_fps()
     raw_frames = decoder.read_all_frames()
@@ -104,7 +89,6 @@ def console_play(file_path: str, mode: str = "A", style: str = "classic",
     input("按 Enter 开始播放...")
 
     # 清屏以擦除残留提示信息
-    from utils.terminal_utils import clear_screen
     clear_screen()
 
     renderer = TerminalRenderer(fps=fps, audio_path=audio_path)

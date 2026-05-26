@@ -23,7 +23,13 @@
 <br>
 
 <p align="center">
-  <img src="demo_C.gif" width="720" alt="TerminalArt demo - Mode C half-block">
+  <img src="demo_C.gif" width="720" alt="Mode C half-block">
+  <br><sub>方案 C — 半块高清</sub>
+</p>
+
+<p align="center">
+  <img src="demo_A.gif" width="720" alt="Mode A ASCII">
+  <br><sub>方案 A — 经典密度风格</sub>
 </p>
 
 <br>
@@ -109,6 +115,14 @@ uv run python -m main --console-play video.mp4 --mode C   # 新终端自动适�
 先在 GUI 播一次（后台自动缓存渲染帧），点**保存为视频**。多线程渲染，有 ffmpeg 自动合音轨。
 
 <br>
+
+### 画质说明
+
+终端播放受限于 cmd 窗口大小，一屏塞不下太多字符。**方案 A** 受影响最大——在 ~100×30 的字符网格上，灰度渐变会显得颗粒感重。
+
+想要真正细腻的效果，**保存成视频再看**。导出的 MP4 不受终端尺寸限制，字符独立编码，高度默认 200，清晰度远超终端实时播放。
+
+渲染速度上：**方案 A 很快**（NumPy 向量化，逐帧几乎瞬间完成）。**方案 B 和 C 比较慢**——逐像素解析 ANSI 再渲染彩色字形，这是正常的。视频较长的话心里有个数。
 
 ### 碰到问题？
 
