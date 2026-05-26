@@ -125,6 +125,41 @@ class FileSaver:
                 mask[:line_h // 2, :, :] = 1.0
             elif ch in (" ", "\xa0"):
                 mask = np.zeros((line_h, char_w, 1), dtype=np.float32)
+            elif 0x2800 <= ord(ch) <= 0x28FF:
+                # 盲文点阵手动掩膜生成，避免依赖字体文件
+                offset = ord(ch) - 0x2800
+                dots = [
+                    (offset & 1) > 0,      # Row 0, Col 0
+                    (offset & 2) > 0,      # Row 1, Col 0
+                    (offset & 4) > 0,      # Row 2, Col 0
+                    (offset & 8) > 0,      # Row 0, Col 1
+                    (offset & 16) > 0,     # Row 1, Col 1
+                    (offset & 32) > 0,     # Row 2, Col 1
+                    (offset & 64) > 0,     # Row 3, Col 0
+                    (offset & 128) > 0,    # Row 3, Col 1
+                ]
+                cell_img = Image.new("L", (char_w, line_h), color=0)
+                cell_draw = ImageDraw.Draw(cell_img)
+                cw = char_w / 2.0
+                rh = line_h / 4.0
+                dot_r = max(1.0, min(cw, rh) * 0.35)
+                
+                positions = [
+                    (0, 0), (1, 0), (2, 0),  # 点 1, 2, 3
+                    (0, 1), (1, 1), (2, 1),  # 点 4, 5, 6
+                    (3, 0), (3, 1)           # 点 7, 8
+                ]
+                for idx, active in enumerate(dots):
+                    if active:
+                        r_idx, c_idx = positions[idx]
+                        cx = cw * (c_idx + 0.5)
+                        cy = rh * (r_idx + 0.5)
+                        cell_draw.ellipse(
+                            [cx - dot_r, cy - dot_r, cx + dot_r, cy + dot_r],
+                            fill=255
+                        )
+                arr = np.array(cell_img).astype(np.float32) / 255.0
+                mask = np.expand_dims(arr, axis=-1)
             else:
                 try:
                     cell_img = Image.new("L", (char_w, line_h), color=0)

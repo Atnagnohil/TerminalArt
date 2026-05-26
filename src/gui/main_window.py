@@ -20,7 +20,7 @@ class TerminalArtGUI:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("TerminalArt v1.0")
-        self.root.geometry("600x540")
+        self.root.geometry("600x600")
         self.root.resizable(False, False)
 
         self.file_path = tk.StringVar()
@@ -65,6 +65,14 @@ class TerminalArtGUI:
         ttk.Radiobutton(mode_frame, text="C - 半块高清彩色（推荐）",
                         variable=self.mode, value="C",
                         command=self._on_mode_change).pack(anchor="w")
+        ttk.Radiobutton(mode_frame, text="D - 盲文点阵超分辨率（等效 8 倍像素点）",
+                        variable=self.mode, value="D",
+                        command=self._on_mode_change).pack(anchor="w")
+
+        # 盲文提示标签（仅方案 D 时显示）
+        self.braille_tip_row = ttk.Frame(mode_frame)
+        ttk.Label(self.braille_tip_row, text="  提示: 若终端显示为方块，请在 Windows Terminal 中运行，或更换等宽中文字体",
+                  foreground="gray").pack(side="left")
 
         # 风格选择器（仅方案 A 时显示）
         self.style_row = ttk.Frame(mode_frame)
@@ -184,13 +192,20 @@ class TerminalArtGUI:
         if mode == "A":
             self.style_row.pack(fill="x", pady=(4, 0))
             self.dot_row.pack_forget()
+            self.braille_tip_row.pack_forget()
         elif mode == "B":
             self.style_row.pack_forget()
             self.dot_row.pack(fill="x", pady=(4, 0))
-        else:
+            self.braille_tip_row.pack_forget()
+        elif mode == "C":
             self.style_row.pack_forget()
             self.dot_row.pack_forget()
             self.thresh_row.pack_forget()
+            self.braille_tip_row.pack_forget()
+        elif mode == "D":
+            self.style_row.pack_forget()
+            self.dot_row.pack_forget()
+            self.braille_tip_row.pack(fill="x", pady=(4, 0))
         self._update_thresh_visibility()
         self.status_text.set(f"方案 {mode} 已选择")
 
@@ -214,6 +229,8 @@ class TerminalArtGUI:
         if mode == "A" and self._style_key == "dot":
             show = True
         elif mode == "B" and self._dot_mode.get():
+            show = True
+        elif mode == "D":
             show = True
 
         if show:
@@ -263,6 +280,8 @@ class TerminalArtGUI:
         elif mode == "B":
             cmd += ["--dot-mode", "1" if self._dot_mode.get() else "0",
                     "--threshold", str(self.threshold.get())]
+        elif mode == "D":
+            cmd += ["--threshold", str(self.threshold.get())]
 
         self._play_proc = subprocess.Popen(
             cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)

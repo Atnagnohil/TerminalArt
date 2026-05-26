@@ -50,7 +50,7 @@ def quick_play(file_path: str, mode: str = "A", width: int = 120):
 def console_play(file_path: str, mode: str = "A", style: str = "classic",
                  dot_mode: bool = False, threshold: int = 128,
                  fps_limit: float = 30.0, loop: bool = True,
-                 cols: int | None = None):
+                 cols: int | None = None, dither: str = "ordered"):
     """在新终端窗口中以最佳尺寸播放，保证不溢出"""
     decoder = MediaDecoder(file_path)
     fps = min(decoder.get_fps(), fps_limit)
@@ -80,7 +80,7 @@ def console_play(file_path: str, mode: str = "A", style: str = "classic",
 
     mapper = create_mapper(mode, target_cols, max_lines=target_lines,
                            style=style, dot_mode=dot_mode,
-                           threshold=threshold)
+                           threshold=threshold, dither=dither)
     frames = [mapper.frame_to_str(f) for f in raw_frames]
 
     print(f"TerminalArt - {file_path}")
@@ -107,10 +107,11 @@ def main():
     )
     parser.add_argument("file_path", nargs="?", help="要播放的多媒体文件路径 (视频/图片/GIF)")
     parser.add_argument("--console-play", action="store_true", help="在新终端窗口中以最佳尺寸播放")
-    parser.add_argument("--mode", choices=["A", "B", "C"], default="A", help="字符画映射方案: A (ASCII黑白), B (ANSI彩色), C (半块高清)")
+    parser.add_argument("--mode", choices=["A", "B", "C", "D"], default="A", help="字符画映射方案: A (ASCII黑白), B (ANSI彩色), C (半块高清), D (盲文点阵高清)")
     parser.add_argument("--style", default="classic", help="方案 A 的字符风格")
     parser.add_argument("--dot-mode", type=int, choices=[0, 1], default=0, help="方案 B 的点阵模式 (0: 禁用, 1: 启用)")
     parser.add_argument("--threshold", type=int, default=128, help="点阵二值化阈值 (0-255)")
+    parser.add_argument("--dither", choices=["ordered", "floyd-steinberg", "none"], default="ordered", help="方案 D 的抖动算法 (ordered: 有序抖动, floyd-steinberg: 误差扩散, none: 无抖动/硬阈值)")
     parser.add_argument("--fps", type=float, default=30.0, dest="fps_limit", help="播放帧率上限")
     parser.add_argument("--loop", type=int, choices=[0, 1], default=1, help="是否循环播放 (0: 否, 1: 是)")
     parser.add_argument("--cols", type=int, help="终端播放的字符宽度")
@@ -133,7 +134,8 @@ def main():
             threshold=args.threshold,
             fps_limit=args.fps_limit,
             loop=(args.loop == 1),
-            cols=args.cols
+            cols=args.cols,
+            dither=args.dither
         )
     else:
         quick_play(args.file_path, mode=args.mode)
