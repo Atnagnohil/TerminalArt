@@ -246,9 +246,11 @@ class TerminalArtGUI:
         self._stop_playback()
 
         mode = self.mode.get()
-        cmd = [
-            sys.executable, "-m", "main", "--console-play",
-            self.file_path.get(),
+        if getattr(sys, 'frozen', False):
+            cmd = [sys.executable, "--console-play", self.file_path.get()]
+        else:
+            cmd = [sys.executable, "-m", "main", "--console-play",
+                   self.file_path.get()]
             "--mode", mode,
             "--fps", str(int(self.fps_limit.get())),
             "--loop", "1" if self.loop_play.get() else "0",
