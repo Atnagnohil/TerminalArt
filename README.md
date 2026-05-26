@@ -38,12 +38,14 @@
 
 drop a video or image on it. it plays back as animated character art in your terminal.
 
-- **3 backends** — ASCII density · ANSI true color · half-block HD
+- **4 backends** — ASCII density · ANSI true color · half-block HD · braille dot matrix
 - **6 character styles** — classic gradient, minimal lines, matrix 01, ink brush, vintage print, dot matrix
-- **dot-matrix mode** — binary `*` threshold, density = brightness, raw and beautiful
+- **dot-matrix mode** — binary `*` threshold for modes A & B
+- **braille super-resolution** — 8 dots per character cell, 4× finer than single-char
+- **ordered dithering** — Bayer 4×4 or Floyd-Steinberg for smooth halftones
 - **dedicated terminal** — pops a new window auto-sized to your video
 - **audio passthrough** — ffmpeg extracts the track, loops with frames
-- **export** — render to MP4 with audio, multi-threaded
+- **export** — render to MP4 (H.264), adjustable char height, multi-threaded
 
 <br>
 
@@ -77,7 +79,10 @@ uv run python -m main --console-play video.mp4 --mode C   # auto-fit terminal
 > every pixel a colored `█`. 24-bit, closest to source.
 
 > **C · Half-block HD**
-> `▀` packs two pixels per cell. double vertical resolution. the sharpest option.
+> `▀` packs two pixels per cell. double vertical resolution. the sharpest full-color option.
+
+> **D · Braille dot matrix**
+> `⠿` encodes 2×4 dots per character. 8× the dot density of single-char. pick a dither mode — ordered (fast, Bayer 4×4) or Floyd-Steinberg (smoother, slower).
 
 <br>
 
@@ -103,16 +108,16 @@ mode A & B. adjustable brightness cutoff — above → `*`, below → blank. low
 ### cli flags
 
 ```
---mode A/B/C       --style classic/minimal/matrix/ink/vintage/dot
---dot-mode 0/1     --threshold 0-255    --fps N
---loop 0/1         --cols N
+--mode A/B/C/D     --style classic/minimal/matrix/ink/vintage/dot
+--dot-mode 0/1     --threshold 0-255    --dither ordered/floyd-steinberg/none
+--fps N            --loop 0/1           --cols N
 ```
 
 <br>
 
 ### export
 
-play once in the GUI (frames cache in background) → hit **Save**. multi-threaded render, auto audio mux if ffmpeg is on PATH.
+play once in the GUI (frames cache in background) → hit **Save**. character height is adjustable (50–500, default 200). multi-threaded render, H.264 encoding, auto audio mux if ffmpeg is on PATH.
 
 <br>
 

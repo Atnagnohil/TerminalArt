@@ -38,12 +38,14 @@
 
 给它视频或图片，它在终端里用字符画出来，还能动。
 
-- **3 种渲染** — ASCII 灰度 · ANSI 真彩 · 半块高清
+- **4 种渲染** — ASCII 灰度 · ANSI 真彩 · 半块高清 · 盲文点阵超分辨率
 - **6 种字符风格** — 经典渐变、极简线条、数字矩阵、书法笔触、复古打印、点阵
-- **点阵模式** — `*` 的二值化阈值，疏密随亮度变化，生猛但有味道
+- **点阵模式** — `*` 二值化阈值，方案 A/B 都有
+- **盲文超分辨率** — 一个字符 8 个点，比单字符精细 4 倍
+- **有序抖动** — Bayer 4×4 或 Floyd-Steinberg，半色调平滑过渡
 - **独立终端** — 弹新窗口，自动适配视频比例
 - **音频同步** — ffmpeg 提取音轨，循环时音频跟着走
-- **导出 MP4** — 多线程渲染，有 ffmpeg 就合音频
+- **导出 MP4** — H.264 编码，可调字符高度，多线程渲染
 
 <br>
 
@@ -68,7 +70,7 @@ uv run python -m main --console-play video.mp4 --mode C   # 新终端自动适�
 
 <br>
 
-### 三种方案
+### 四种方案
 
 > **A · ASCII**
 > 灰度映射到字符密度。6 种风格可选，GUI 下拉或 `--style`。
@@ -77,7 +79,10 @@ uv run python -m main --console-play video.mp4 --mode C   # 新终端自动适�
 > 每个像素一个彩色 `█`。24 位色，最接近原画面。
 
 > **C · 半块高清**
-> `▀` 一个字符塞两个像素。纵向分辨率翻倍。好终端上最清晰。
+> `▀` 一个字符塞两个像素。纵向分辨率翻倍。好终端上最清晰的彩色方案。
+
+> **D · 盲文点阵**
+> `⠿` 每个字符编码 2×4 个点。点密度是单字符的 8 倍。可选有序抖动（Bayer 4×4，快）或 Floyd-Steinberg（更平滑，较慢）。
 
 <br>
 
@@ -103,16 +108,16 @@ uv run python -m main --console-play video.mp4 --mode C   # 新终端自动适�
 ### 命令行参数
 
 ```
---mode A/B/C       --style classic/minimal/matrix/ink/vintage/dot
---dot-mode 0/1     --threshold 0-255    --fps N
---loop 0/1         --cols N
+--mode A/B/C/D     --style classic/minimal/matrix/ink/vintage/dot
+--dot-mode 0/1     --threshold 0-255    --dither ordered/floyd-steinberg/none
+--fps N            --loop 0/1           --cols N
 ```
 
 <br>
 
 ### 导出视频
 
-先在 GUI 播一次（后台自动缓存渲染帧），点**保存为视频**。多线程渲染，有 ffmpeg 自动合音轨。
+先在 GUI 播一次（后台自动缓存渲染帧），点**保存为视频**。字符高度可调（50–500，默认 200）。多线程渲染，H.264 编码，有 ffmpeg 自动合音轨。
 
 <br>
 
